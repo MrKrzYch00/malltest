@@ -123,6 +123,7 @@ int main(int argc, char* argv[]) {
     } else {
      if(cntrrunning > numthreads)
       break;
+     ++threnum;
      ++cntrrunning;
     }
    }
