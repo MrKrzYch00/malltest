@@ -1,0 +1,28 @@
+MallTest: Threaded Malloc Tester 1.00 by Mr_KrzYch00
+
+Runs simple threaded malloc & write & read & free tests.
+Allows to set amount of iterations and memory to use per thread
+as well as amount of threads to use.
+
+Designed to test embedded devices like Odroid or Raspberry Pi
+in search for CPU - memory errors.
+
+Use -h to see help.
+
+WARNING! This works like a stress test. High CPU/memory
+temperatures as well as crashes, reboots or/and hardware
+malfunction is to be expected!
+
+This software is provided "as is" without warranty of any kind,
+either expressed or implied. In no event author is reponsible
+for any damage the usage of this software may cause.
+
+
+
+Bitcoin: 1KrzY1CwE532e6YjN4aCzgV19gtAzQMatJ
+Paypal:  https://www.paypal.me/MrKrzYch00
+^ in case You want to reward my work.
+
+====================================
+           by Mr_KrzYch00
+====================================
