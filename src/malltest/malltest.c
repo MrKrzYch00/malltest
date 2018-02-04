@@ -10,6 +10,8 @@ typedef struct KrzYThread {
   size_t x;
   size_t mallsize;
   size_t i;
+  int simpleread;
+  int simplewrite;
   int is_running;
 } KrzYThread;
 
@@ -17,12 +19,16 @@ typedef struct KrzYOptions {
   size_t numthreads;
   size_t memory;
   size_t numiterations;
+  int issimpleread;
+  int issimplewrite;
 } KrzYOptions;
 
 static void KrzYInitOptions(KrzYOptions* options) {
   options->numthreads = 1;
   options->memory = 65535;
   options->numiterations = 10000;
+  options->issimpleread = 0;
+  options->issimplewrite = 0;
 }
 
 static void *threading(void *a) {
@@ -31,6 +37,8 @@ static void *threading(void *a) {
   unsigned char n;
   unsigned int i;
   size_t m;
+  size_t maxreadcheck = b->simpleread?1:b->mallsize;
+  size_t maxwritecheck = b->simplewrite?1:b->mallsize;
   size_t *lul = NULL;
   char *lulch = NULL;
   if(y == 0) y = (size_t)-1;
@@ -38,12 +46,12 @@ static void *threading(void *a) {
     lul = malloc(b->mallsize * sizeof(size_t));
     lulch = (char*)lul;
     for(n = 0; n < 8; ++n) {
-      for(m = 0; m < b->mallsize; ++m) {
+      for(m = 0; m < maxwritecheck; ++m) {
        for(i = 1; i < sizeof(size_t); ++i) {
         lulch[m*i] = 1 << n;
        }
       }
-      for(m = (b->mallsize - 1); m != 0; --m) {
+      for(m = 0; m < maxreadcheck; ++m) {
        for(i = 1; i < sizeof(size_t); ++i) {
         if(lulch[m*i] != (1 << n)) {
          fprintf(stderr,"ERROR !\n");
@@ -73,13 +81,22 @@ int main(int argc, char* argv[]) {
    } else if (arg[0] == '-' && arg[1] == '-' && arg[2] == 't'
            && arg[3] >= '0' && arg[3] <= '9') {
      options.numthreads = atoi(arg + 3);
+   } else if (arg[0] == '-' && arg[1] == '-' && arg[2] == 's'
+           && arg[3] == 'r') {
+     options.issimpleread = 1;
+   } else if (arg[0] == '-' && arg[1] == '-' && arg[2] == 's'
+           && arg[3] == 'w') {
+     options.issimpleread  = 1;
+     options.issimplewrite = 1;
    } else if (arg[0] == '-' && (arg[1] == 'h' || arg[1] == '?' || (arg[1] == '-'
           && (arg[2] == 'h' || arg[2] == '?')))) {
-     fprintf(stderr,"MallTest: Threaded Malloc Tester v1.00 by Mr_KrzYch00\n\n"
+     fprintf(stderr,"MallTest: Threaded Malloc Tester v1.01 by Mr_KrzYch00\n\n"
                     "  --h           shows this help (--?, -h, -?)\n"
                     "  --i#          perform # iterations (d: 10000; 0 => 4.2 billion)\n"
-                    "  --m#          use # bytes of memory/thread (d:65535)\n"
-                    "  --t#          use # threads, (d:1)\n\n");
+                    "  --m#          use # bytes of memory/thread (d: 65535)\n"
+                    "  --sr          do simple read test\n"
+                    "  --sw          do simple write test (turns ON --sr automatically)\n"
+                    "  --t#          use # threads, (d: 1)\n\n");
      fprintf(stderr,"WARNING! This works like a stress test. High CPU/memory\n"
                     "temperatures as well as crashes, reboots or/and hardware\n"
                     "malfunction is to be expected!\n\n");
@@ -104,6 +121,8 @@ int main(int argc, char* argv[]) {
     pthread_attr_setdetachstate(&(thr_attr[i]), PTHREAD_CREATE_DETACHED);
     t[i].mallsize = options.memory;
     t[i].i = options.numiterations;
+    t[i].simpleread = options.issimpleread;
+    t[i].simplewrite = options.issimplewrite;
     t[i].is_running = 1;
     pthread_create(&thr[i], &(thr_attr[i]), threading, (void *)&t[i]);
    }
@@ -124,6 +143,8 @@ int main(int argc, char* argv[]) {
      if(cntrrunning > numthreads)
       break;
      ++threnum;
+     if(threnum>=numthreads)
+      threnum=0;
      ++cntrrunning;
     }
    }

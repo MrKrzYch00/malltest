@@ -1,4 +1,4 @@
-MallTest: Threaded Malloc Tester 1.00 by Mr_KrzYch00
+MallTest: Threaded Malloc Tester by Mr_KrzYch00
 
 Runs simple threaded malloc & write & read & free tests.
 Allows to set amount of iterations and memory to use per thread
